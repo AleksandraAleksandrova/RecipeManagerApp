@@ -1,0 +1,34 @@
+<UserControl x:Class="RecipeManager.WPF.Controls.DynamicFilterControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="150" />
+        </Grid.ColumnDefinitions>
+        
+        <ItemsControl x:Name="FilterPanel">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical" Margin="0,0,15,10">
+                        <TextBlock Text="{Binding PropertyName}" FontWeight="Bold" Margin="0,0,0,5" Foreground="#34495E" />
+                        <TextBox Text="{Binding FilterValue, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" Padding="5" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Grid.Column="1" Content="Apply Filter" Click="ApplyFilter_Click" 
+                Width="120" Height="40" Margin="10,0,0,0" VerticalAlignment="Bottom"
+                Background="#2980B9" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand" />
+    </Grid>
+</UserControl>

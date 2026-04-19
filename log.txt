@@ -1,0 +1,142 @@
+Using launch settings from RecipeManager.Blazor\Properties\launchSettings.json...
+Building...
+C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Infrastructure\RecipeManager.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 10.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx [C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Blazor\RecipeManager.Blazor.csproj]
+C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Infrastructure\RecipeManager.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 10.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf [C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Blazor\RecipeManager.Blazor.csproj]
+C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Infrastructure\RecipeManager.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 10.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx
+C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Infrastructure\RecipeManager.Infrastructure.csproj : warning NU1903: Package 'System.Security.Cryptography.Xml' 10.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf
+info: Microsoft.EntityFrameworkCore.Migrations[20411]
+      Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsLock' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT OR IGNORE INTO "__EFMigrationsLock"("Id", "Timestamp") VALUES(1, '2026-04-19 16:10:31.3286607+00:00');
+      SELECT changes();
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+          "MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY,
+          "ProductVersion" TEXT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM "__EFMigrationsHistory"
+      ORDER BY "MigrationId";
+info: Microsoft.EntityFrameworkCore.Migrations[20402]
+      Applying migration '20260414194447_SqlServerInit'.
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE "Categories" (
+          "Id" int NOT NULL CONSTRAINT "PK_Categories" PRIMARY KEY,
+          "Name" nvarchar(max) NOT NULL
+      );
+warn: RecipeManager.Blazor[0]
+      Migration skipped/failed: SQLite Error 1: 'table "Categories" already exists'.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5034
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\Admin\source\repos\RecipeManagerApp\RecipeManager.Blazor
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "c"."Id", "c"."Name"
+      FROM "Categories" AS "c"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "c"."Id", "c"."Name"
+      FROM "Categories" AS "c"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "c"."Id", "c"."Name"
+      FROM "Categories" AS "c"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.
+info: RecipeManager.Core.Services.RecipeService[0]
+      Loading all recipes.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "r"."Id", "r"."CategoryId", "r"."CreatedAt", "r"."Description", "r"."Ingredients", "r"."Instructions", "r"."Title", "c"."Id", "c"."Name"
+      FROM "Recipes" AS "r"
+      LEFT JOIN "Categories" AS "c" ON "r"."CategoryId" = "c"."Id"
+info: RecipeManager.Core.Services.RecipeService[0]
+      Successfully loaded 3 recipes.

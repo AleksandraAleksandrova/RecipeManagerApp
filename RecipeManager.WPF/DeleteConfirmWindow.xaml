@@ -1,0 +1,21 @@
+<Window x:Class="RecipeManager.WPF.DeleteConfirmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Confirm Deletion" Height="200" Width="400" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="#FAFAFA">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Are you sure?" FontSize="22" FontWeight="Bold" Foreground="#E74C3C" Margin="0,0,0,10"/>
+        
+        <TextBlock x:Name="MessageText" Grid.Row="1" FontSize="14" Foreground="#34495E" TextWrapping="Wrap"/>
+        
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel" IsCancel="True" Width="80" Height="35" Margin="0,0,10,0" Background="Transparent" BorderThickness="0" Foreground="#7F8C8D" FontWeight="Bold" Cursor="Hand" Click="Cancel_Click"/>
+            <Button Content="Delete" IsDefault="True" Width="100" Height="35" Background="#E74C3C" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand" Click="Delete_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

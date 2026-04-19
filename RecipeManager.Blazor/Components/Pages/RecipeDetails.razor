@@ -1,0 +1,248 @@
+@page "/recipes/{id:int}"
+@rendermode InteractiveServer
+@using RecipeManager.Core.ViewModels
+@inject MainViewModel ViewModel
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<PageTitle>Recipe Details</PageTitle>
+
+@if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+{
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+        <MudAlert Severity="Severity.Error">@ViewModel.ErrorMessage</MudAlert>
+    </MudContainer>
+}
+
+@if (!string.IsNullOrEmpty(ViewModel.SuccessMessage))
+{
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+        <MudAlert Severity="Severity.Success">@ViewModel.SuccessMessage</MudAlert>
+    </MudContainer>
+}
+
+@if (ViewModel.SelectedRecipe == null)
+{
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-5">
+        <MudAlert Severity="Severity.Warning" Class="p-4 rounded shadow-sm d-flex align-items-center">
+            <div>
+                <MudText Typo="Typo.h5" Class="fw-bold mb-1">Recipe Not Found / Loading</MudText>
+                <MudText>We couldn't find the recipe you were looking for. It may have been removed, or it is loading.</MudText>
+            </div>
+            <MudButton Variant="Variant.Outlined" Color="Color.Warning" Class="ms-auto" Href="/recipes">Back to Recipes</MudButton>
+        </MudAlert>
+    </MudContainer>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
+        <MudBreadcrumbs Items="@(new List<BreadcrumbItem> { new BreadcrumbItem("Recipes", href: "/recipes"), new BreadcrumbItem(ViewModel.SelectedRecipe.Title, href: null, disabled: true) })" Class="mb-4" />
+
+        <MudPaper Elevation="3" Class="overflow-hidden mb-4">
+            <div class="bg-primary text-white py-4 px-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <MudText Typo="Typo.h3" Class="fw-bold mb-2">@ViewModel.SelectedRecipe.Title</MudText>
+                        @if (ViewModel.SelectedRecipe.Category != null)
+                        {
+                            <MudChip T="string" Color="Color.Secondary" Size="Size.Large">
+                                @ViewModel.SelectedRecipe.Category.Name
+                            </MudChip>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <MudGrid Class="px-4 py-5" Spacing="4">
+                <MudItem xs="12" md="8" Class="border-end pr-md-5">
+                    <MudTextField @bind-Value="ViewModel.SelectedRecipe.Title" Label="Recipe Title" Placeholder="Enter recipe title" Immediate="true" Variant="Variant.Outlined" Class="mb-3" />
+                    <MudTextField @bind-Value="ViewModel.SelectedRecipe.Description" Label="Description" Placeholder="Briefly describe this recipe..." Immediate="true" Variant="Variant.Outlined" Lines="3" Class="mb-4" />
+
+                    <MudText Typo="Typo.h6" Class="fw-bold text-primary mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.ShoppingBasket" Class="mr-2" /> Ingredients
+                    </MudText>
+                    <MudTextField @bind-Value="ViewModel.SelectedRecipe.Ingredients" Placeholder="List ingredients here..." Immediate="true" Variant="Variant.Outlined" Lines="6" Class="mb-4" />
+
+                    <MudText Typo="Typo.h6" Class="fw-bold text-primary mb-2 mt-4">
+                        <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-2" /> Instructions
+                    </MudText>
+
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="ViewModel.SelectedRecipe.Instructions" Placeholder="Step-by-step instructions (Markdown supported)..." Immediate="true" Variant="Variant.Outlined" Lines="12" Class="mb-4" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudPaper Elevation="0" Outlined="true" Class="pa-4 h-100" Style="overflow-y: auto; max-height: 330px;">
+                                @if (string.IsNullOrEmpty(ViewModel.SelectedRecipe.Instructions))
+                                {
+                                    <MudText Color="Color.Surface" Typo="Typo.body2" Class="fst-italic">Instructions preview will appear here...</MudText>
+                                }
+                                else
+                                {
+                                    <div class="markdown-preview">
+                                        @((MarkupString)Markdig.Markdown.ToHtml(ViewModel.SelectedRecipe.Instructions))
+                                    </div>
+                                }
+                            </MudPaper>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+
+                <MudItem xs="12" md="4" Class="pl-md-5 bg-light">
+                    <MudSelect T="int?" Label="Category" @bind-Value="ViewModel.SelectedRecipe.CategoryId" Variant="Variant.Outlined" Class="mb-5">
+                        <MudSelectItem T="int?" Value="@((int?)null)">-- Select a Category --</MudSelectItem>
+                        @foreach (var cat in ViewModel.Categories)
+                        {
+                            <MudSelectItem T="int?" Value="@((int?)cat.Id)">@cat.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <div class="mb-5">
+                        <MudText Typo="Typo.subtitle2" Class="fw-bold text-secondary text-uppercase mb-3" Style="letter-spacing: 1px;">Metadata</MudText>
+                        <div class="d-flex align-items-center">
+                            <MudIcon Icon="@Icons.Material.Filled.EventAvailable" Color="Color.Primary" Class="mr-2" />
+                            <MudText>Created: @ViewModel.SelectedRecipe?.CreatedAt.ToString("MMM dd, yyyy")</MudText>
+                        </div>
+                    </div>
+
+                    <div>
+                        <MudText Typo="Typo.subtitle2" Class="fw-bold text-secondary text-uppercase mb-3" Style="letter-spacing: 1px;">Actions</MudText>
+                        <div class="d-grid gap-3">
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Save" OnClick="ViewModel.UpdateRecipeAsync" FullWidth="true">
+                                Save Changes
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" OnClick="DeleteRecipeAsync" FullWidth="true">
+                                Delete Recipe
+                            </MudButton>
+                        </div>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+
+        <div class="d-flex justify-content-between align-items-center pt-4 mb-4">
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack" Href="/recipes">
+                Back to Recipes
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.History" OnClick="ToggleRevisions">
+                @(showRevisions ? "Hide Revision History" : "Show Revision History")
+            </MudButton>
+        </div>
+
+        @if (showRevisions)
+        {
+            @if (ViewModel.SelectedRecipe.Revisions != null && ViewModel.SelectedRecipe.Revisions.Any())
+            {
+                <MudPaper Elevation="3" Class="mb-4">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <MudText Typo="Typo.h5" Class="fw-bold mb-0 d-flex align-items-center text-dark">
+                            <MudIcon Icon="@Icons.Material.Filled.History" Color="Color.Secondary" Class="mr-2" /> Revision History
+                        </MudText>
+                    </div>
+                    <MudTable Items="ViewModel.SelectedRecipe.Revisions" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Revision</MudTh>
+                            <MudTh>Date</MudTh>
+                            <MudTh>Changes</MudTh>
+                        </HeaderContent>
+                        <RowTemplate Context="rev">
+                            <MudTd DataLabel="Revision" Class="fw-medium">@rev.ModifiedBy</MudTd>
+                            <MudTd DataLabel="Date" Class="text-muted">@rev.ModifiedAt.ToString("MMM dd, yyyy HH:mm")</MudTd>
+                            <MudTd DataLabel="Changes">
+                                @if (!string.IsNullOrEmpty(rev.Content))
+                                {
+                                    try {
+                                        var diffs = System.Text.Json.JsonSerializer.Deserialize<List<RecipeManager.Core.Models.DiffItem>>(rev.Content);
+                                        if (diffs != null && diffs.Any())
+                                        {
+                                            <ul class="list-unstyled mb-0 mb-text-small">
+                                                @foreach (var diff in diffs)
+                                                {
+                                                    if (diff.FieldName == "CategoryId")
+                                                    {
+                                                        diff.FieldName = "Category";
+                                                        if (int.TryParse(diff.OldValue, out int oldId))
+                                                        {
+                                                            diff.OldValue = ViewModel.Categories?.FirstOrDefault(c => c.Id == oldId)?.Name ?? diff.OldValue;
+                                                        }
+                                                        if (int.TryParse(diff.NewValue, out int newId))
+                                                        {
+                                                            diff.NewValue = ViewModel.Categories?.FirstOrDefault(c => c.Id == newId)?.Name ?? diff.NewValue;
+                                                        }
+                                                    }
+                                                    <li class="mb-1">
+                                                        <MudChip T="string" Color="Color.Info" Size="Size.Small" Class="mr-2">@diff.FieldName</MudChip>
+                                                        <span class="text-danger text-decoration-line-through me-1">@(string.IsNullOrEmpty(diff.OldValue) ? "empty" : diff.OldValue)</span>
+                                                        <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" Class="text-muted mx-1" />
+                                                        <span class="text-success">@(string.IsNullOrEmpty(diff.NewValue) ? "empty" : diff.NewValue)</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    } catch {
+                                        <span class="text-muted fst-italic">Content altered</span>
+                                    }
+                                }
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Class="shadow-sm">
+                    No revisions found for this recipe.
+                </MudAlert>
+            }
+        }
+    </MudContainer>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool showRevisions = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.PropertyChanged += (s, e) => InvokeAsync(StateHasChanged);
+
+        if (ViewModel.Recipes == null || !System.Linq.Enumerable.Any(ViewModel.Recipes))
+        {
+            await ViewModel.LoadRecipesAsync();
+        }
+
+        if (ViewModel.Categories == null || !System.Linq.Enumerable.Any(ViewModel.Categories))
+        {
+            await ViewModel.LoadCategoriesAsync();
+        }
+
+        var selected = System.Linq.Enumerable.FirstOrDefault(ViewModel.Recipes, r => r.Id == Id);
+        if (selected != null)
+        {
+            ViewModel.SelectedRecipe = selected;
+            showRevisions = false;
+        }
+    }
+
+    private void ToggleRevisions()
+    {
+        showRevisions = !showRevisions;
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= (s, e) => InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DeleteRecipeAsync()
+    {
+        await ViewModel.DeleteRecipeAsync();
+        if (ViewModel.SelectedRecipe == null)
+        {
+            NavigationManager.NavigateTo("/recipes");
+        }
+    }
+}

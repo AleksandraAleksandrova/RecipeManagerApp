@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RecipeManager.Blazor/RecipeManager.Blazor.csproj" />
+  <Project Path="RecipeManager.Core/RecipeManager.Core.csproj" />
+  <Project Path="RecipeManager.Infrastructure/RecipeManager.Infrastructure.csproj" />
+  <Project Path="RecipeManager.WPF/RecipeManager.WPF.csproj" />
+</Solution>

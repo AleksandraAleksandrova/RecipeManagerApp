@@ -1,0 +1,62 @@
+@typeparam TItem
+@using System.Reflection
+@using System.Linq.Expressions
+@using RecipeManager.Core.Utils
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Filter @typeof(TItem).Name</h5>
+        <div class="row g-3 align-items-end">
+            @foreach (var currProp in FilterProperties)
+            {
+                var propName = currProp;
+                var propType = GetPropertyType(propName);
+                if (propType == null) continue;
+
+                <div class="col-md-3">
+                    <label class="form-label">@propName</label>
+                    <input type="@GetInputType(propType)" class="form-control" @bind="FilterValues[propName]" @bind:event="oninput" />
+                </div>
+            }
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" @onclick="ApplyFilter">
+                    <i class="bi bi-funnel"></i> Apply Filter
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<string> FilterProperties { get; set; } = new();
+    [Parameter] public EventCallback<Expression<Func<TItem, bool>>> OnFilterApplied { get; set; }
+
+    private Dictionary<string, string> FilterValues { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        foreach (var prop in FilterProperties)
+        {
+            FilterValues[prop] = string.Empty;
+        }
+    }
+
+    private Type? GetPropertyType(string propertyName)
+    {
+        return typeof(TItem).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase)?.PropertyType;
+    }
+
+    private string GetInputType(Type propType)
+    {
+        if (propType == typeof(string)) return "text";
+        if (propType == typeof(int) || propType == typeof(int?)) return "number";
+        if (propType == typeof(DateTime) || propType == typeof(DateTime?)) return "date";
+        return "text";
+    }
+
+    private async Task ApplyFilter()
+    {
+        var expr = FilterExpressionBuilder.BuildExpression<TItem>(FilterValues);
+        await OnFilterApplied.InvokeAsync(expr);
+    }
+}

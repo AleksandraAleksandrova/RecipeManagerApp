@@ -1,0 +1,174 @@
+@page "/recipes"
+@rendermode InteractiveServer
+@using RecipeManager.Core.Models
+@using RecipeManager.Core.Services
+@using RecipeManager.Core.ViewModels
+@inject MainViewModel ViewModel
+@implements IDisposable
+
+<PageTitle>Recipes</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <MudText Typo="Typo.h3">Recipes</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Href="/recipes/create">
+            Create New
+        </MudButton>
+    </div>
+
+    <MudPaper Class="pa-4 mb-4" Elevation="3">
+        <MudGrid>
+            <MudItem xs="12" md="3">
+                <MudTextField T="string" Value="@ViewModel.SearchRecipeTitle" Label="Search Title" Placeholder="e.g. Pie" 
+                              Immediate="true" ValueChanged="OnTitleChangedStr" />
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                <MudSelect T="int?" Label="Filter by Category" Value="ViewModel.SelectedFilterCategoryId" ValueChanged="OnCategoryFilterChangedInt">
+                    <MudSelectItem T="int?" Value="@((int?)null)">-- All Categories --</MudSelectItem>
+                    @foreach (var cat in ViewModel.Categories)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)cat.Id)">@cat.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                <MudSelect T="string" Label="Sort by" Value="ViewModel.SortRecipeOrder" ValueChanged="OnSortOrderChangedStr">
+                    <MudSelectItem Value="@(string.Empty)">-- Default --</MudSelectItem>
+                    <MudSelectItem Value="@("NameAsc")">Name (A-Z)</MudSelectItem>
+                    <MudSelectItem Value="@("NameDesc")">Name (Z-A)</MudSelectItem>
+                    <MudSelectItem Value="@("CreatedAsc")">Earliest</MudSelectItem>
+                    <MudSelectItem Value="@("CreatedDesc")">Latest</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" md="3" Class="d-flex align-end">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" FullWidth="true" OnClick="ClearFilterAsync">Clear</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @if (!string.IsNullOrEmpty(ViewModel.SuccessMessage))
+    {
+        <MudAlert Severity="Severity.Success" ShowCloseIcon="true" CloseIconClicked="ClearMessage" Class="mb-4">
+            @ViewModel.SuccessMessage
+        </MudAlert>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4">
+            @ViewModel.ErrorMessage
+        </MudAlert>
+    }
+
+    @if (ViewModel.Recipes == null)
+    {
+        <div class="d-flex justify-content-center p-5">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (!ViewModel.Recipes.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            No recipes found. Click "Create New" to add one!
+        </MudAlert>
+    }
+    else
+    {
+        @inject NavigationManager NavigationManager
+        <MudPaper Elevation="3">
+            <GenericTable 
+                TItem="Recipe" 
+                Items="ViewModel.Recipes" 
+                Columns="new List<string> { nameof(Recipe.Title), nameof(Recipe.Description), nameof(Recipe.CreatedAt) }"
+                OnRowClick="OnRecipeClicked"
+                OnDeleteClick="OnRecipeDeleted" />
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Created { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        if (ViewModel.Recipes != null)
+        {
+            ViewModel.Recipes.CollectionChanged += OnViewModelRecipesChanged;
+        }
+
+        if (Created == "true")
+        {
+            ViewModel.SuccessMessage = "Recipe successfully created!";
+        }
+
+        await ViewModel.LoadRecipesAsync();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Recipes) && ViewModel.Recipes != null)
+        {
+            ViewModel.Recipes.CollectionChanged -= OnViewModelRecipesChanged;
+            ViewModel.Recipes.CollectionChanged += OnViewModelRecipesChanged;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnViewModelRecipesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnTitleChangedStr(string value)
+    {
+        ViewModel.SearchRecipeTitle = value;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task OnCategoryFilterChangedInt(int? catId)
+    {
+        ViewModel.SelectedFilterCategoryId = catId;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task OnSortOrderChangedStr(string value)
+    {
+        ViewModel.SortRecipeOrder = value;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        await ViewModel.ClearRecipeFilter();
+    }
+
+    private void OnRecipeClicked(Recipe recipe)
+    {
+        NavigationManager.NavigateTo($"/recipes/{recipe.Id}");
+    }
+
+    private async Task OnRecipeDeleted(Recipe recipe)
+    {
+        ViewModel.SelectedRecipe = recipe;
+        await ViewModel.DeleteRecipeAsync();
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        if (ViewModel.Recipes != null)
+        {
+            ViewModel.Recipes.CollectionChanged -= OnViewModelRecipesChanged;
+        }
+    }
+
+    private void ClearMessage()
+    {
+        ViewModel.SuccessMessage = string.Empty;
+    }
+}

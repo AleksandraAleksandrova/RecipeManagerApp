@@ -1,0 +1,121 @@
+@typeparam TItem
+
+@if (Items == null || !Items.Any())
+{
+    @if (EmptyTemplate != null)
+    {
+        @EmptyTemplate
+    }
+    else
+    {
+        <div class="alert alert-info">No items to display.</div>
+    }
+}
+else
+{
+    @if (Columns == null || !Columns.Any())
+    {
+        <div class="alert alert-warning">No columns explicitly defined to display.</div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        @foreach (var col in Columns)
+                        {
+                            <th scope="col">@col</th>
+                        }
+                        @if (OnDeleteClick.HasDelegate || OnRowClick.HasDelegate)
+                        {
+                            <th scope="col" class="text-end">Actions</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Items)
+                    {
+                        <tr @onclick="() => OnRowClicked(item)" style="cursor: pointer;" class="@((SelectedItem != null && SelectedItem.Equals(item)) ? "table-active" : "")">
+                            @foreach (var col in Columns)
+                            {
+                                <td>@GetPropertyValue(item, col)</td>
+                            }
+                            @if (OnDeleteClick.HasDelegate || OnRowClick.HasDelegate)
+                            {
+                                <td class="text-end">
+                                    @if (OnRowClick.HasDelegate)
+                                    {
+                                        <button class="btn btn-outline-primary btn-sm me-2" @onclick="() => OnRowClicked(item)" @onclick:stopPropagation="true">
+                                            <i class="bi bi-eye"></i> View
+                                        </button>
+                                    }
+                                    @if (OnDeleteClick.HasDelegate)
+                                    {
+                                        <button class="btn btn-outline-danger btn-sm" @onclick="() => OnDeleteClicked(item)" @onclick:stopPropagation="true">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public IEnumerable<TItem>? Items { get; set; }
+
+    [Parameter]
+    public List<string>? Columns { get; set; }
+
+    [Parameter]
+    public RenderFragment? EmptyTemplate { get; set; }
+
+    [Parameter]
+    public TItem? SelectedItem { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> SelectedItemChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnRowClick { get; set; }
+
+    [Parameter]
+    public EventCallback<TItem> OnDeleteClick { get; set; }
+
+    private async Task OnRowClicked(TItem item)
+    {
+        SelectedItem = item;
+        await SelectedItemChanged.InvokeAsync(item);
+        if (OnRowClick.HasDelegate)
+        {
+            await OnRowClick.InvokeAsync(item);
+        }
+    }
+
+    private async Task OnDeleteClicked(TItem item)
+    {
+        if (OnDeleteClick.HasDelegate)
+        {
+            await OnDeleteClick.InvokeAsync(item);
+        }
+    }
+
+    private string GetPropertyValue(TItem item, string propertyName)
+    {
+        if (item == null || string.IsNullOrWhiteSpace(propertyName))
+            return string.Empty;
+
+        var propInfo = typeof(TItem).GetProperty(propertyName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase);
+        if (propInfo == null)
+            return string.Empty;
+
+        var value = propInfo.GetValue(item);
+        return value?.ToString() ?? string.Empty;
+    }
+}

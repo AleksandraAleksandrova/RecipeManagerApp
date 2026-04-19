@@ -1,0 +1,111 @@
+@page "/recipes/create"
+@rendermode InteractiveServer
+@using RecipeManager.Core.ViewModels
+@inject MainViewModel ViewModel
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Recipe</PageTitle>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Create New Recipe</h2>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @ViewModel.ErrorMessage
+                        </div>
+                    }
+
+                    <EditForm Model="ViewModel" FormName="CreateRecipeForm" OnValidSubmit="HandleValidSubmitAsync">
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-bold">Recipe Name</label>
+                            <InputText id="title" class="form-control" placeholder="e.g. Grandma's Apple Pie" @bind-Value="ViewModel.NewRecipeName" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-bold">Description</label>
+                            <InputTextArea id="description" class="form-control" rows="2" placeholder="Briefly describe this recipe..." @bind-Value="ViewModel.NewRecipeDescription" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="ingredients" class="form-label fw-bold">Ingredients</label>
+                            <InputTextArea id="ingredients" class="form-control" rows="4" placeholder="List ingredients here..." @bind-Value="ViewModel.NewRecipeIngredients" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="instructions" class="form-label fw-bold">Instructions</label>
+                            <InputTextArea id="instructions" class="form-control" rows="6" placeholder="Step-by-step instructions..." @bind-Value="ViewModel.NewRecipeInstructions" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="category" class="form-label fw-bold">Category</label>
+                            <InputSelect id="category" class="form-select" @bind-Value="ViewModel.NewRecipeCategoryId">
+                                <option value="">-- Select a Category --</option>
+                                @foreach (var cat in ViewModel.Categories)
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end border-top pt-4">
+                            <a href="/recipes" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                                @if (_isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                    <span>Saving...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-save me-1"></i>
+                                    <span>Save Recipe</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _isSubmitting = false;
+
+    protected override void OnInitialized()
+    {
+        ViewModel.BeginCreateRecipe();
+    }
+
+    private async Task HandleValidSubmitAsync()
+    {
+        if (_isSubmitting || string.IsNullOrWhiteSpace(ViewModel.NewRecipeName)) 
+            return;
+            
+        _isSubmitting = true;
+        
+        try
+        {
+            await ViewModel.CreateRecipeAsync();
+
+            if (string.IsNullOrEmpty(ViewModel.ErrorMessage))
+            {
+                NavigationManager.NavigateTo("/recipes?created=true");
+            }
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

@@ -1,0 +1,99 @@
+@page "/categories"
+@rendermode InteractiveServer
+@using RecipeManager.Core.Models
+@using RecipeManager.Core.Services
+@using RecipeManager.Core.ViewModels
+@inject MainViewModel ViewModel
+@implements IDisposable
+
+<PageTitle>Categories</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Categories</h1>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-end g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold mb-1">Search Name:</label>
+                <input type="text" class="form-control" value="@ViewModel.SearchCategoryName" @oninput="OnNameChanged" placeholder="e.g. Breakfast" />
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-danger w-100" @onclick="ClearFilterAsync">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewModel.Categories == null)
+{
+    <div class="d-flex justify-content-center p-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (!ViewModel.Categories.Any())
+{
+    <div class="alert alert-info">
+        No categories found.
+    </div>
+}
+else
+{
+    <GenericTable 
+        TItem="Category" 
+        Items="ViewModel.Categories" 
+        Columns="new List<string> { nameof(Category.Name) }" />
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        if (ViewModel.Categories != null)
+        {
+            ViewModel.Categories.CollectionChanged += OnViewModelCategoriesChanged;
+        }
+        await ViewModel.LoadCategoriesAsync();
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.Categories) && ViewModel.Categories != null)
+        {
+            ViewModel.Categories.CollectionChanged -= OnViewModelCategoriesChanged;
+            ViewModel.Categories.CollectionChanged += OnViewModelCategoriesChanged;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnViewModelCategoriesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnNameChanged(ChangeEventArgs e)
+    {
+        ViewModel.SearchCategoryName = e.Value?.ToString() ?? string.Empty;
+        // The property setter automatically filters in ViewModel. 
+        // We can just await a minor delay to let it finish since it is async void in MainViewModel.
+        await Task.Delay(100); 
+        StateHasChanged();
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        await ViewModel.ClearCategoryFilter();
+    }
+
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        if (ViewModel.Categories != null)
+        {
+            ViewModel.Categories.CollectionChanged -= OnViewModelCategoriesChanged;
+        }
+    }
+}
