@@ -28,11 +28,18 @@ namespace RecipeManager.Core.Utils
                 {
                     if (propInfo.PropertyType == typeof(string))
                     {
-                        var val = Expression.Constant(filter.Value, typeof(string));
-                        var method = typeof(string).GetMethod("Contains", new[] { typeof(string) });
-                        if (method != null)
+                        var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+
+                        if (toLowerMethod != null && containsMethod != null)
                         {
-                            comparisonExpr = Expression.Call(propExpr, method, val);
+                            var lowerPropCall = Expression.Call(propExpr, toLowerMethod);
+                            var val = Expression.Constant(filter.Value.ToLower(), typeof(string));
+
+                            var nullCheck = Expression.NotEqual(propExpr, Expression.Constant(null, typeof(string)));
+                            var containsCall = Expression.Call(lowerPropCall, containsMethod, val);
+
+                            comparisonExpr = Expression.AndAlso(nullCheck, containsCall);
                         }
                     }
                     else if (propInfo.PropertyType == typeof(int) || propInfo.PropertyType == typeof(int?))

@@ -87,21 +87,20 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
-                            <TextBlock Text="Search" FontWeight="Bold" Foreground="#2C3E50" FontSize="16" Margin="0,0,0,10"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                <TextBlock Text="Title:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#34495E" Width="70" Margin="0,0,10,0"/>
-                                <TextBox Text="{Binding SearchRecipeTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200" Height="35" Padding="5"/>
+                            <TextBlock Text="Dynamic Filter" FontWeight="Bold" Foreground="#2C3E50" FontSize="16" Margin="0,0,0,10"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                                <TextBlock Text="Select filters:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <CheckBox Content="Title" IsChecked="{Binding IncludeTitleFilter}" Command="{Binding UpdateRecipeFilterColumnsCommand}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <CheckBox Content="Category Name" IsChecked="{Binding IncludeCategoryFilter}" Command="{Binding UpdateRecipeFilterColumnsCommand}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <CheckBox Content="Ingredients" IsChecked="{Binding IncludeIngredientsFilter}" Command="{Binding UpdateRecipeFilterColumnsCommand}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <Button Content="Clear filter" Width="80" Height="25" Margin="10,0,0,0" Background="#E74C3C" Foreground="White" BorderThickness="0" Cursor="Hand" Click="ClearRecipeFilter_Click" />
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Category:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#34495E" Width="70" Margin="0,0,10,0"/>
-                                <ComboBox ItemsSource="{Binding Categories}" DisplayMemberPath="Name" SelectedValuePath="Id" 
-                                          SelectedValue="{Binding SelectedFilterCategoryId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                          Width="200" Height="35" Padding="5"/>
-                                <Button Content="Clear filter" Width="80" Height="35" Margin="10,0,0,0" Background="#E74C3C" Foreground="White" BorderThickness="0" Cursor="Hand"
-                                        Command="{Binding ClearRecipeFilterCommand}" />
-                            </StackPanel>
+                            <controls:DynamicFilterControl x:Name="RecipeFilterControl"
+                                TargetType="{x:Type models:Recipe}"
+                                ValidCategories="{Binding Categories}"
+                                FilterProperties="{Binding CurrentRecipeFilterProperties}"
+                                FilterCommand="{Binding ApplyDynamicRecipeFilterCommand}" />
                         </StackPanel>
                         <controls:GenericListControl Grid.Row="1"
                             ItemsSource="{Binding Recipes}" 
@@ -115,11 +114,20 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-                            <TextBlock Text="Search Category:" VerticalAlignment="Center" FontWeight="Bold" Foreground="#34495E" Margin="0,0,10,0"/>
-                            <TextBox Text="{Binding SearchCategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="35" Padding="5" Margin="0,0,20,0"/>
-                            <Button Content="Clear" Width="80" Height="35" Margin="10,0,0,0" Background="#E74C3C" Foreground="White" BorderThickness="0" Cursor="Hand"
-                                    Command="{Binding ClearCategoryFilterCommand}" />
+                        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
+                            <TextBlock Text="Dynamic Filter" FontWeight="Bold" Foreground="#2C3E50" FontSize="16" Margin="0,0,0,10"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                                <TextBlock Text="Select filters:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <CheckBox Content="Name" IsChecked="{Binding IncludeCategoryNameFilter}" Command="{Binding UpdateCategoryFilterColumnsCommand}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <CheckBox Content="Description" IsChecked="{Binding IncludeCategoryDescriptionFilter}" Command="{Binding UpdateCategoryFilterColumnsCommand}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <CheckBox Content="Common Ingredients" IsChecked="{Binding IncludeCategoryIngredientsFilter}" Command="{Binding UpdateCategoryFilterColumnsCommand}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <Button Content="Clear filter" Width="80" Height="25" Margin="10,0,0,0" Background="#E74C3C" Foreground="White" BorderThickness="0" Cursor="Hand" Click="ClearCategoryFilter_Click" />
+                            </StackPanel>
+
+                            <controls:DynamicFilterControl x:Name="CategoryFilterControl"
+                                TargetType="{x:Type models:Category}"
+                                FilterProperties="{Binding CurrentCategoryFilterProperties}"
+                                FilterCommand="{Binding ApplyDynamicCategoryFilterCommand}" />
                         </StackPanel>
                         <controls:GenericListControl Grid.Row="1"
                             ItemsSource="{Binding Categories}" 

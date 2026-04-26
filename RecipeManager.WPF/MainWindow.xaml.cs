@@ -25,6 +25,34 @@ namespace RecipeManager.WPF
         {
             InitializeComponent();
             DataContext = viewModel;
+
+            // To ensure initial checks align with initial string props layout
+            viewModel.UpdateRecipeFilterColumns();
+            viewModel.UpdateCategoryFilterColumns();
+        }
+
+        private void ClearRecipeFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (FindName("RecipeFilterControl") is Controls.DynamicFilterControl filterControl)
+            {
+                filterControl.ClearFilters();
+            }
+            if (DataContext is MainViewModel vm)
+            {
+                vm.LoadRecipesCommand.Execute(null);
+            }
+        }
+
+        private void ClearCategoryFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (FindName("CategoryFilterControl") is Controls.DynamicFilterControl filterControl)
+            {
+                filterControl.ClearFilters();
+            }
+            if (DataContext is MainViewModel vm)
+            {
+                vm.LoadCategoriesCommand.Execute(null);
+            }
         }
     }
 }

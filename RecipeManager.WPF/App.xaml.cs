@@ -63,7 +63,6 @@ namespace RecipeManager.WPF
                 });
             }
 
-            // Core
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IRecipeRepository, RecipeRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -71,10 +70,8 @@ namespace RecipeManager.WPF
             services.AddScoped<CategoryService>();
             services.AddSingleton<IDialogService, WpfDialogService>();
 
-            // ViewModels
             services.AddTransient<MainViewModel>();
 
-            // Views
             services.AddTransient<MainWindow>();
         }
 
@@ -91,7 +88,6 @@ namespace RecipeManager.WPF
                 }
                 catch (Exception ex)
                 {
-                    // Ignore migration issues when switching DBs with mismatched histories
                     System.Diagnostics.Debug.WriteLine($"Migration skipped/failed: {ex.Message}");
                 }
             }

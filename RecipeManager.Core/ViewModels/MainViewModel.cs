@@ -27,7 +27,7 @@ namespace RecipeManager.Core.ViewModels
         private List<string> _recipeListColumns = new() { "Title" };
 
         [ObservableProperty]
-        private List<string> _categoryListColumns = new() { "Name" };
+        private List<string> _categoryListColumns = new() { "Name", "Description", "CommonIngredients" };
 
         [ObservableProperty]
         private Recipe _selectedRecipe;
@@ -80,19 +80,65 @@ namespace RecipeManager.Core.ViewModels
                 await ApplyRecipeFiltersAsync();
         }
 
+        [ObservableProperty]
+        private List<string> _currentRecipeFilterProperties = new() { "Title", "CategoryName", "Ingredients" };
+
+        [ObservableProperty]
+        private bool _includeTitleFilter = true;
+
+        [ObservableProperty]
+        private bool _includeCategoryFilter = true;
+
+        [ObservableProperty]
+        private bool _includeIngredientsFilter = true;
+
+        [RelayCommand]
+        public void UpdateRecipeFilterColumns()
+        {
+            var cols = new List<string>();
+            if (IncludeTitleFilter) cols.Add("Title");
+            if (IncludeCategoryFilter) cols.Add("CategoryName");
+            if (IncludeIngredientsFilter) cols.Add("Ingredients");
+            CurrentRecipeFilterProperties = cols;
+        }
+
+        [RelayCommand]
+        public void SetRecipeFilterColumns(string columns)
+        {
+            if (string.IsNullOrWhiteSpace(columns))
+            {
+                CurrentRecipeFilterProperties = new List<string>();
+                return;
+            }
+            CurrentRecipeFilterProperties = new List<string>(columns.Split(','));
+        }
+
+        [RelayCommand]
+        public async Task ApplyDynamicRecipeFilterAsync(Expression<Func<Recipe, bool>> predicate)
+        {
+             await FilterRecipesAsync(predicate);
+        }
+
+        [ObservableProperty]
+        private string _searchRecipeIngredients = string.Empty;
+
         public async Task ApplyRecipeFiltersAsync()
         {
-            if (string.IsNullOrWhiteSpace(SearchRecipeTitle) && !SelectedFilterCategoryId.HasValue)
+            if (string.IsNullOrWhiteSpace(SearchRecipeTitle) && string.IsNullOrWhiteSpace(SearchCategoryName) && string.IsNullOrWhiteSpace(SearchRecipeIngredients))
             {
                 await LoadRecipesAsync();
                 return;
             }
 
             var lowerTitle = SearchRecipeTitle?.ToLower() ?? string.Empty;
+            var lowerCatName = SearchCategoryName?.ToLower() ?? string.Empty;
+            var lowerIngredients = SearchRecipeIngredients?.ToLower() ?? string.Empty;
 
             await FilterRecipesAsync(r => 
                 (string.IsNullOrWhiteSpace(lowerTitle) || r.Title.ToLower().Contains(lowerTitle)) &&
-                (!SelectedFilterCategoryId.HasValue || r.CategoryId == SelectedFilterCategoryId.Value));
+                (string.IsNullOrWhiteSpace(lowerCatName) || (r.Category != null && r.Category.Name.ToLower().Contains(lowerCatName))) &&
+                (string.IsNullOrWhiteSpace(lowerIngredients) || r.Ingredients.ToLower().Contains(lowerIngredients))
+            );
         }
 
         [RelayCommand]
@@ -100,6 +146,8 @@ namespace RecipeManager.Core.ViewModels
         {
             _suppressFilterTrigger = true;
             SearchRecipeTitle = string.Empty;
+            SearchCategoryName = string.Empty;
+            SearchRecipeIngredients = string.Empty;
             SelectedFilterCategoryId = null;
             SortRecipeOrder = string.Empty;
             _suppressFilterTrigger = false;
@@ -192,23 +240,74 @@ namespace RecipeManager.Core.ViewModels
         }
 
         [ObservableProperty]
+        private List<string> _currentCategoryFilterProperties = new() { "Name", "Description", "CommonIngredients" };
+
+        [ObservableProperty]
+        private bool _includeCategoryNameFilter = true;
+
+        [ObservableProperty]
+        private bool _includeCategoryDescriptionFilter = true;
+
+        [ObservableProperty]
+        private bool _includeCategoryIngredientsFilter = true;
+
+        [RelayCommand]
+        public void UpdateCategoryFilterColumns()
+        {
+            var cols = new List<string>();
+            if (IncludeCategoryNameFilter) cols.Add("Name");
+            if (IncludeCategoryDescriptionFilter) cols.Add("Description");
+            if (IncludeCategoryIngredientsFilter) cols.Add("CommonIngredients");
+            CurrentCategoryFilterProperties = cols;
+        }
+
+        [RelayCommand]
+        public void SetCategoryFilterColumns(string columns)
+        {
+            if (string.IsNullOrWhiteSpace(columns))
+            {
+                CurrentCategoryFilterProperties = new List<string>();
+                return;
+            }
+            CurrentCategoryFilterProperties = new List<string>(columns.Split(','));
+        }
+
+        [RelayCommand]
+        public async Task ApplyDynamicCategoryFilterAsync(Expression<Func<Category, bool>> predicate)
+        {
+             await FilterCategoriesAsync(predicate);
+        }
+
+        [ObservableProperty]
         private string _searchCategoryName = string.Empty;
 
         private bool _suppressCategoryFilter = false;
 
-        async partial void OnSearchCategoryNameChanged(string value)
-        {
-            if (_suppressCategoryFilter) return;
+        [ObservableProperty]
+        private string _searchCategoryDescription = string.Empty;
 
-            if (string.IsNullOrWhiteSpace(value))
+        [ObservableProperty]
+        private string _searchCategoryIngredients = string.Empty;
+
+        public async Task ApplyCategoryFiltersAsync()
+        {
+            if (string.IsNullOrWhiteSpace(SearchCategoryName) && 
+                string.IsNullOrWhiteSpace(SearchCategoryDescription) && 
+                string.IsNullOrWhiteSpace(SearchCategoryIngredients))
             {
                 await LoadCategoriesAsync();
+                return;
             }
-            else
-            {
-                var lowerValue = value.ToLower();
-                await FilterCategoriesAsync(c => c.Name.ToLower().Contains(lowerValue));
-            }
+
+            var lowerName = SearchCategoryName?.ToLower() ?? string.Empty;
+            var lowerDesc = SearchCategoryDescription?.ToLower() ?? string.Empty;
+            var lowerIng = SearchCategoryIngredients?.ToLower() ?? string.Empty;
+
+            await FilterCategoriesAsync(c => 
+                (string.IsNullOrWhiteSpace(lowerName) || c.Name.ToLower().Contains(lowerName)) &&
+                (string.IsNullOrWhiteSpace(lowerDesc) || c.Description.ToLower().Contains(lowerDesc)) &&
+                (string.IsNullOrWhiteSpace(lowerIng) || c.CommonIngredients.ToLower().Contains(lowerIng))
+            );
         }
 
         [RelayCommand]
@@ -216,8 +315,10 @@ namespace RecipeManager.Core.ViewModels
         {
             _suppressCategoryFilter = true;
             SearchCategoryName = string.Empty;
+            SearchCategoryDescription = string.Empty;
+            SearchCategoryIngredients = string.Empty;
             _suppressCategoryFilter = false;
-            await LoadCategoriesAsync();
+            await ApplyCategoryFiltersAsync();
         }
 
         private void ApplySortingToRecipesCollection(IEnumerable<Recipe> source)
@@ -426,7 +527,6 @@ namespace RecipeManager.Core.ViewModels
                 var recipeService = scope.ServiceProvider.GetRequiredService<RecipeService>();
                 await recipeService.UpdateRecipeAsync(SelectedRecipe);
 
-                // Re-fetch to ensure revisions update in UI
                 var recipeRepo = scope.ServiceProvider.GetRequiredService<IRecipeRepository>();
                 var fullRecipe = await recipeRepo.GetWithRevisionsAsync(SelectedRecipe.Id);
                 if (fullRecipe != null)

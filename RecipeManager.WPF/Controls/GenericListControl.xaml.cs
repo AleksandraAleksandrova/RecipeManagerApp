@@ -66,9 +66,13 @@ namespace RecipeManager.WPF.Controls
 
             foreach (var colName in columns)
             {
+                var displayName = colName;
+                if (colName == "CategoryName") displayName = "Category Name";
+                if (colName == "CommonIngredients") displayName = "Common Ingredients";
+
                 var column = new DataGridTextColumn
                 {
-                    Header = colName,
+                    Header = displayName,
                     Binding = new Binding(colName),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star)
                 };

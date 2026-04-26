@@ -32,5 +32,8 @@ namespace RecipeManager.Core.Models
 
         public int? CategoryId { get; set; }
         public virtual Category Category { get; set; }
+
+        // Helper property so we can easily filter dynamically by category name through reflection
+        public string CategoryName => Category?.Name ?? string.Empty;
     }
 }

@@ -20,8 +20,12 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Vertical" Margin="0,0,15,10">
-                        <TextBlock Text="{Binding PropertyName}" FontWeight="Bold" Margin="0,0,0,5" Foreground="#34495E" />
-                        <TextBox Text="{Binding FilterValue, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" Padding="5" />
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" Margin="0,0,0,5" Foreground="#34495E" />
+
+                        <Grid>
+                            <TextBox Text="{Binding FilterValue, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" Padding="5" Visibility="{Binding IsTextBoxVisibility}" />
+                            <ComboBox ItemsSource="{Binding ValidCategories, RelativeSource={RelativeSource AncestorType=UserControl}}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedValue="{Binding FilterValue, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" Padding="5" Visibility="{Binding IsComboBoxVisibility}" />
+                        </Grid>
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

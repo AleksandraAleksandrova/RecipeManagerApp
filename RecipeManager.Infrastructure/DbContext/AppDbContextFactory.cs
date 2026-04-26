@@ -10,8 +10,8 @@ namespace RecipeManager.Infrastructure.Data
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-            // Design-time SQL Server string. During runtime, it uses the one in appsettings.json
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=RecipesDb;Trusted_Connection=True;TrustServerCertificate=True;");
+            // SQLite is used by both frontend projects, we should use it for migrations to match the target database
+            optionsBuilder.UseSqlite("Data Source=recipes.db");
 
             return new AppDbContext(optionsBuilder.Options);
         }

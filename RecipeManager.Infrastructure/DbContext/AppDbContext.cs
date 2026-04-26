@@ -30,11 +30,11 @@ namespace RecipeManager.Infrastructure.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Breakfast" },
-                new Category { Id = 2, Name = "Lunch" },
-                new Category { Id = 3, Name = "Dinner" },
-                new Category { Id = 4, Name = "Dessert" },
-                new Category { Id = 5, Name = "Other" }
+                new Category { Id = 1, Name = "Breakfast", Description = "Start your day right", CommonIngredients = "Eggs, Bacon, Oats" },
+                new Category { Id = 2, Name = "Lunch", Description = "Mid-day meals", CommonIngredients = "Chicken, Rice, Bread" },
+                new Category { Id = 3, Name = "Dinner", Description = "Evening dining", CommonIngredients = "Pork, Beef, Potatoes" },
+                new Category { Id = 4, Name = "Dessert", Description = "Sweet treats", CommonIngredients = "Sugar, Flour, Chocolate" },
+                new Category { Id = 5, Name = "Other", Description = "Miscellaneous recipes", CommonIngredients = "Various" }
             );
         }
     }

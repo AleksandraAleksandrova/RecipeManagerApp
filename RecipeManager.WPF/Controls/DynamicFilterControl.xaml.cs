@@ -20,6 +20,15 @@ namespace RecipeManager.WPF.Controls
         public static readonly DependencyProperty FilterCommandProperty =
             DependencyProperty.Register("FilterCommand", typeof(ICommand), typeof(DynamicFilterControl), new PropertyMetadata(null));
 
+        public static readonly DependencyProperty CategoriesProperty =
+            DependencyProperty.Register("ValidCategories", typeof(IEnumerable<Core.Models.Category>), typeof(DynamicFilterControl), new PropertyMetadata(null));
+
+        public IEnumerable<Core.Models.Category> ValidCategories
+        {
+            get => (IEnumerable<Core.Models.Category>)GetValue(CategoriesProperty);
+            set => SetValue(CategoriesProperty, value);
+        }
+
         public DynamicFilterControl()
         {
             InitializeComponent();
@@ -80,7 +89,6 @@ namespace RecipeManager.WPF.Controls
                 values[item.PropertyName] = item.FilterValue ?? string.Empty;
             }
 
-            // Using reflection to call Generic BuildExpression<T> from utils
             var method = typeof(FilterExpressionBuilder).GetMethod("BuildExpression")?.MakeGenericMethod(TargetType);
             if (method != null)
             {
@@ -91,12 +99,40 @@ namespace RecipeManager.WPF.Controls
                 }
             }
         }
+
+        public void ClearFilters()
+        {
+            if (_filterItems != null)
+            {
+                foreach (var item in _filterItems)
+                {
+                    item.FilterValue = string.Empty;
+                }
+
+                FilterPanel.ItemsSource = null;
+                FilterPanel.ItemsSource = _filterItems;
+            }
+        }
     }
 
     public class FilterItem
     {
         public string PropertyName { get; set; }
+
+        public string DisplayName
+        {
+            get
+            {
+                if (PropertyName == "CategoryName") return "Category Name";
+                if (PropertyName == "CommonIngredients") return "Common Ingredients";
+                return PropertyName;
+            }
+        }
+
         public Type PropertyType { get; set; }
         public string FilterValue { get; set; }
+
+        public Visibility IsTextBoxVisibility => PropertyName != "CategoryName" ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility IsComboBoxVisibility => PropertyName == "CategoryName" ? Visibility.Visible : Visibility.Collapsed;
     }
 }

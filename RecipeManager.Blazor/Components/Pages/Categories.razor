@@ -8,45 +8,78 @@
 
 <PageTitle>Categories</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Categories</h1>
-</div>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <MudText Typo="Typo.h3">Categories</MudText>
+    </div>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row align-items-end g-3">
-            <div class="col-md-6">
-                <label class="form-label fw-bold mb-1">Search Name:</label>
-                <input type="text" class="form-control" value="@ViewModel.SearchCategoryName" @oninput="OnNameChanged" placeholder="e.g. Breakfast" />
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-outline-danger w-100" @onclick="ClearFilterAsync">Clear</button>
-            </div>
+    <MudPaper Class="pa-4 mb-4" Elevation="3">
+        <div class="mb-3 d-flex align-center">
+            <MudText Typo="Typo.subtitle1" Class="mr-4">Select filters:</MudText>
+            <MudCheckBox T="bool" Label="Name" Value="ViewModel.IncludeCategoryNameFilter" ValueChanged="OnIncludeNameChanged" Color="Color.Primary" />
+            <MudCheckBox T="bool" Label="Description" Value="ViewModel.IncludeCategoryDescriptionFilter" ValueChanged="OnIncludeDescChanged" Color="Color.Primary" />
+            <MudCheckBox T="bool" Label="Common Ingredients" Value="ViewModel.IncludeCategoryIngredientsFilter" ValueChanged="OnIncludeIngredientsChanged" Color="Color.Primary" />
         </div>
-    </div>
-</div>
+        <MudGrid>
+            @if (ViewModel.IncludeCategoryNameFilter)
+            {
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string" Value="@ViewModel.SearchCategoryName" Label="Search Name" Placeholder="e.g. Dinner" 
+                                  Immediate="true" ValueChanged="OnNameChangedStr" />
+                </MudItem>
+            }
 
-@if (ViewModel.Categories == null)
-{
-    <div class="d-flex justify-content-center p-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            @if (ViewModel.IncludeCategoryDescriptionFilter)
+            {
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string" Value="@ViewModel.SearchCategoryDescription" Label="Search Description" Placeholder="e.g. Evening meal" 
+                                  Immediate="true" ValueChanged="OnDescChangedStr" />
+                </MudItem>
+            }
+
+            @if (ViewModel.IncludeCategoryIngredientsFilter)
+            {
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string" Value="@ViewModel.SearchCategoryIngredients" Label="Search Common Ingredients" Placeholder="e.g. Pork" 
+                                  Immediate="true" ValueChanged="OnIngredientsChangedStr" />
+                </MudItem>
+            }
+
+            <MudItem xs="12" md="3" Class="d-flex align-end">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" FullWidth="true" OnClick="ClearFilterAsync">Clear</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4">
+            @ViewModel.ErrorMessage
+        </MudAlert>
+    }
+
+    @if (ViewModel.Categories == null)
+    {
+        <div class="d-flex justify-content-center p-5">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
         </div>
-    </div>
-}
-else if (!ViewModel.Categories.Any())
-{
-    <div class="alert alert-info">
-        No categories found.
-    </div>
-}
-else
-{
-    <GenericTable 
-        TItem="Category" 
-        Items="ViewModel.Categories" 
-        Columns="new List<string> { nameof(Category.Name) }" />
-}
+    }
+    else if (!ViewModel.Categories.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            No categories found.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Elevation="3">
+            <GenericTable 
+                TItem="Category" 
+                Items="ViewModel.Categories" 
+                Columns="new List<string> { nameof(Category.Name), nameof(Category.Description), nameof(Category.CommonIngredients) }" />
+        </MudPaper>
+    }
+</MudContainer>
 
 @code {
     protected override async Task OnInitializedAsync()
@@ -74,13 +107,46 @@ else
         InvokeAsync(StateHasChanged);
     }
 
-    private async Task OnNameChanged(ChangeEventArgs e)
+    private async Task OnNameChangedStr(string value)
     {
-        ViewModel.SearchCategoryName = e.Value?.ToString() ?? string.Empty;
-        // The property setter automatically filters in ViewModel. 
-        // We can just await a minor delay to let it finish since it is async void in MainViewModel.
-        await Task.Delay(100); 
-        StateHasChanged();
+        ViewModel.SearchCategoryName = value;
+        await ViewModel.ApplyCategoryFiltersAsync();
+    }
+
+    private async Task OnDescChangedStr(string value)
+    {
+        ViewModel.SearchCategoryDescription = value;
+        await ViewModel.ApplyCategoryFiltersAsync();
+    }
+
+    private async Task OnIngredientsChangedStr(string value)
+    {
+        ViewModel.SearchCategoryIngredients = value;
+        await ViewModel.ApplyCategoryFiltersAsync();
+    }
+
+    private async Task OnIncludeNameChanged(bool value)
+    {
+        ViewModel.IncludeCategoryNameFilter = value;
+        ViewModel.UpdateCategoryFilterColumns();
+        if (!value) ViewModel.SearchCategoryName = string.Empty;
+        await ViewModel.ApplyCategoryFiltersAsync();
+    }
+
+    private async Task OnIncludeDescChanged(bool value)
+    {
+        ViewModel.IncludeCategoryDescriptionFilter = value;
+        ViewModel.UpdateCategoryFilterColumns();
+        if (!value) ViewModel.SearchCategoryDescription = string.Empty;
+        await ViewModel.ApplyCategoryFiltersAsync();
+    }
+
+    private async Task OnIncludeIngredientsChanged(bool value)
+    {
+        ViewModel.IncludeCategoryIngredientsFilter = value;
+        ViewModel.UpdateCategoryFilterColumns();
+        if (!value) ViewModel.SearchCategoryIngredients = string.Empty;
+        await ViewModel.ApplyCategoryFiltersAsync();
     }
 
     private async Task ClearFilterAsync()

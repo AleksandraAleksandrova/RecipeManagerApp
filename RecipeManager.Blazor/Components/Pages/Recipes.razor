@@ -17,21 +17,36 @@
     </div>
 
     <MudPaper Class="pa-4 mb-4" Elevation="3">
+        <div class="mb-3 d-flex align-center">
+            <MudText Typo="Typo.subtitle1" Class="mr-4">Select filters:</MudText>
+            <MudCheckBox T="bool" Label="Title" Value="ViewModel.IncludeTitleFilter" ValueChanged="OnIncludeTitleChanged" Color="Color.Primary" />
+            <MudCheckBox T="bool" Label="Category Name" Value="ViewModel.IncludeCategoryFilter" ValueChanged="OnIncludeCategoryChanged" Color="Color.Primary" />
+            <MudCheckBox T="bool" Label="Ingredients" Value="ViewModel.IncludeIngredientsFilter" ValueChanged="OnIncludeIngredientsChanged" Color="Color.Primary" />
+        </div>
         <MudGrid>
-            <MudItem xs="12" md="3">
-                <MudTextField T="string" Value="@ViewModel.SearchRecipeTitle" Label="Search Title" Placeholder="e.g. Pie" 
-                              Immediate="true" ValueChanged="OnTitleChangedStr" />
-            </MudItem>
+            @if (ViewModel.IncludeTitleFilter)
+            {
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string" Value="@ViewModel.SearchRecipeTitle" Label="Search Title" Placeholder="e.g. Pie" 
+                                  Immediate="true" ValueChanged="OnTitleChangedStr" />
+                </MudItem>
+            }
 
-            <MudItem xs="12" md="3">
-                <MudSelect T="int?" Label="Filter by Category" Value="ViewModel.SelectedFilterCategoryId" ValueChanged="OnCategoryFilterChangedInt">
-                    <MudSelectItem T="int?" Value="@((int?)null)">-- All Categories --</MudSelectItem>
-                    @foreach (var cat in ViewModel.Categories)
-                    {
-                        <MudSelectItem T="int?" Value="@((int?)cat.Id)">@cat.Name</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
+            @if (ViewModel.IncludeCategoryFilter)
+            {
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string" Value="@ViewModel.SearchCategoryName" Label="Search Category Name" Placeholder="e.g. Dinner" 
+                                  Immediate="true" ValueChanged="OnCategorySearchChangedStr" />
+                </MudItem>
+            }
+
+            @if (ViewModel.IncludeIngredientsFilter)
+            {
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string" Value="@ViewModel.SearchRecipeIngredients" Label="Search Ingredients" Placeholder="e.g. Chicken" 
+                                  Immediate="true" ValueChanged="OnIngredientsSearchChangedStr" />
+                </MudItem>
+            }
 
             <MudItem xs="12" md="3">
                 <MudSelect T="string" Label="Sort by" Value="ViewModel.SortRecipeOrder" ValueChanged="OnSortOrderChangedStr">
@@ -130,9 +145,39 @@
         await ViewModel.ApplyRecipeFiltersAsync();
     }
 
-    private async Task OnCategoryFilterChangedInt(int? catId)
+    private async Task OnCategorySearchChangedStr(string value)
     {
-        ViewModel.SelectedFilterCategoryId = catId;
+        ViewModel.SearchCategoryName = value;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task OnIngredientsSearchChangedStr(string value)
+    {
+        ViewModel.SearchRecipeIngredients = value;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task OnIncludeTitleChanged(bool value)
+    {
+        ViewModel.IncludeTitleFilter = value;
+        ViewModel.UpdateRecipeFilterColumns();
+        if (!value) ViewModel.SearchRecipeTitle = string.Empty;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task OnIncludeCategoryChanged(bool value)
+    {
+        ViewModel.IncludeCategoryFilter = value;
+        ViewModel.UpdateRecipeFilterColumns();
+        if (!value) ViewModel.SearchCategoryName = string.Empty;
+        await ViewModel.ApplyRecipeFiltersAsync();
+    }
+
+    private async Task OnIncludeIngredientsChanged(bool value)
+    {
+        ViewModel.IncludeIngredientsFilter = value;
+        ViewModel.UpdateRecipeFilterColumns();
+        if (!value) ViewModel.SearchRecipeIngredients = string.Empty;
         await ViewModel.ApplyRecipeFiltersAsync();
     }
 
